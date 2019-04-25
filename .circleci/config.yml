@@ -68,25 +68,8 @@ jobs:
 #          command: |            
 #            docker login -u _json_key -p ${GCLOUD_SERVICE_KEY} https://eu.gcr.io 
 
-#      - run:
-#          name: Push Docker image
-#          command: |            
-#            docker push eu.gcr.io/fagdag-devops/circleci/cci-demo-docker:$TAG
-#            docker login -u $DOCKER_LOGIN -p $DOCKER_PASSWORD
-#            docker push circleci/cci-demo-docker:$TAG
-#             docker login -u _json_key --password-stdin https://eu.gcr.io < ${HOME}/account-auth.json
-#             docker push $DOCKER_REGISTRY/$CIRCLE_PROJECT_REPONAME:$CIRCLE_BRANCH-v$VERSION
-#            docker login -u $DOCKER_LOGIN -p $DOCKER_PASSWORD
-#            docker push circleci/cci-demo-docker:$TAG
-
-      - store_artifacts:
-          path: /tmp/test-results
-          destination: raw-test-output
-
-      - store_test_results:
-          path: /tmp/test-results
-
 workflows:
+
   main:
     jobs:
       - build:
