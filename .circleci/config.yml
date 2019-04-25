@@ -67,10 +67,10 @@ jobs:
           command: |            
             echo $GCLOUD_SERVICE_KEY > ${HOME}/account-auth.json
             docker login -u _json_key --password-stdin https://eu.gcr.io < ${HOME}/account-auth.json
-      - run:
-          name: Push Docker image
-          command: |            
-            docker push eu.gcr.io/fagdag-devops/circleci/cci-demo-docker:$TAG
+#      - run:
+#          name: Push Docker image
+#          command: |            
+#            docker push eu.gcr.io/fagdag-devops/circleci/cci-demo-docker:$TAG
 #            docker login -u $DOCKER_LOGIN -p $DOCKER_PASSWORD
 #            docker push circleci/cci-demo-docker:$TAG
       - store_artifacts:
