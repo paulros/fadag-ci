@@ -2,8 +2,9 @@ aliases:
   - &gcp-docker-login
     name: GCP Authentication
     command: |
-           echo $GCLOUD_SERVICE_KEY > ${HOME}/account-auth.json
-           docker login -u _json_key --password-stdin https://eu.gcr.io < ${HOME}/account-auth.json
+           docker login -u _json_key -p "$(cat $GCLOUD_SERVICE_KEY)" https://eu.gcr.io
+#           echo $GCLOUD_SERVICE_KEY > ${HOME}/account-auth.json
+#           docker login -u _json_key --password-stdin https://eu.gcr.io < ${HOME}/account-auth.json
 
 version: 2.1
 
@@ -55,7 +56,7 @@ jobs:
           name: Install Docker client
           command: |
             set -x
-            VER="17.03.0-ce"
+            VER="17.09.0-ce"
             curl -L -o /tmp/docker-$VER.tgz https://get.docker.com/builds/Linux/x86_64/docker-$VER.tgz
             tar -xz -C /tmp -f /tmp/docker-$VER.tgz
             mv /tmp/docker/* /usr/bin
