@@ -57,6 +57,7 @@ jobs:
       - image: entur/cci-toolbox:1.2
     working_directory: /go/src/github.com/circleci/cci-demo-docker
     steps: 
+      - setup_remote_docker
       - checkout    
       - run:
           name: Build Docker image
@@ -76,8 +77,8 @@ workflows:
 
   main:
     jobs:
-      - build:
-          context: global
+#      - build:
+#          context: global
       - build-push    
 #      - owasp/owasp_dependency_check:
 #          context: global
