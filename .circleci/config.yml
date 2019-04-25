@@ -66,7 +66,7 @@ jobs:
           name: GCP login
           command: |            
             echo $GCLOUD_SERVICE_KEY > ${HOME}/account-auth.json
-            docker login -u _json_key -p ${DOCKER_PASSWORD} https://eu.gcr.io 
+            docker login -u _json_key -p ${GCLOUD_SERVICE_KEY} https://eu.gcr.io 
 #      - run:
 #          name: Push Docker image
 #          command: |            
