@@ -1,13 +1,8 @@
-aliases:
-  - &gcp-docker-login
-    name: GCP Authentication
-    command: |
-           docker login -u _json_key -p "$(cat $GCLOUD_SERVICE_KEY)" https://eu.gcr.io
-#           echo $GCLOUD_SERVICE_KEY > ${HOME}/account-auth.json
-#           docker login -u _json_key --password-stdin https://eu.gcr.io < ${HOME}/account-auth.json
-
 version: 2.1
-
+orbs:
+  clair: ovotech/clair-scanner@1.4.25
+  owasp: entur/owasp@0.0.2
+  
 jobs:
   build:
     docker:
@@ -49,42 +44,41 @@ jobs:
             # without this option script will return success regardless of testing result due to pipe after test command
             make test | tee ${TEST_RESULTS}/go-test.out
 
+      - setup_remote_docker
+
+      # This should go into custom primary image, here's only for the sake of explanation
       - run:
           name: Install Docker client
           command: |
-             set -x \
-             curl -fSL "https://download.docker.com/linux/static/stable/x86_64/docker-18.03.0-ce.tgz" -o docker.tgz \
-             tar -xzvf docker.tgz \
-             mv docker/* /usr/local/bin/ \
-             rmdir docker \
-             rm docker.tgz \
-             docker -v
+            set -x
+            VER="17.03.0-ce"
+            curl -L -o /tmp/docker-$VER.tgz https://get.docker.com/builds/Linux/x86_64/docker-$VER.tgz
+            tar -xz -C /tmp -f /tmp/docker-$VER.tgz
+            mv /tmp/docker/* /usr/bin
 
       - run:
           name: Build service
           command: make
 
       - run:
-          name: Build Docker image
+          name: Build and push Docker image
           command: |
             TAG="0.1.${CIRCLE_BUILD_NUM}"
             docker build -t circleci/cci-demo-docker:$TAG .
-      
-      - run: *gcp-docker-login
-
       - run:
-          name: Push to the GCP
-          command: |
-            docker push eu.gcr.io/fagdag-devops/circleci/cci-demo-docker:$TAG
-            
+          name: docker push
+            docker login -u $DOCKER_LOGIN -p $DOCKER_PASSWORD
+            docker push circleci/cci-demo-docker:$TAG
+
+      - store_artifacts:
+          path: /tmp/test-results
+          destination: raw-test-output
+
+      - store_test_results:
+          path: /tmp/test-results
 
 workflows:
-
   main:
     jobs:
       - build:
           context: global
-#      - owasp/owasp_dependency_check:
-#          context: global
-#          requires:
-#            - build
