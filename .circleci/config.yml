@@ -48,7 +48,7 @@ jobs:
           name: Install Docker client
           command: |
             set -x
-            VER="17.03.0-ce"
+            VER="18.03.0-ce"
             curl -L -o /tmp/docker-$VER.tgz https://get.docker.com/builds/Linux/x86_64/docker-$VER.tgz
             tar -xz -C /tmp -f /tmp/docker-$VER.tgz
             mv /tmp/docker/* /usr/bin
@@ -62,9 +62,17 @@ jobs:
           command: |
             TAG="0.1.${CIRCLE_BUILD_NUM}"
             docker build -t circleci/cci-demo-docker:$TAG .
-            docker login -u $DOCKER_LOGIN -p $DOCKER_PASSWORD
-            docker push circleci/cci-demo-docker:$TAG
-
+      - run:
+          name: GCP login
+          command: |            
+            echo $GCLOUD_SERVICE_KEY > ${HOME}/account-auth.json
+            docker login -u _json_key --password-stdin https://eu.gcr.io < ${HOME}/account-auth.json
+      - run:
+          name: Push Docker image
+          command: |            
+            docker push eu.gcr.io/fagdag-devops/circleci/cci-demo-docker:$TAG
+#            docker login -u $DOCKER_LOGIN -p $DOCKER_PASSWORD
+#            docker push circleci/cci-demo-docker:$TAG
       - store_artifacts:
           path: /tmp/test-results
           destination: raw-test-output
