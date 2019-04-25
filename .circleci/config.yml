@@ -1,3 +1,12 @@
+aliases:
+  - &gcp-docker-login
+    name: GCP Authentication
+    command: |
+           echo $GCLOUD_SERVICE_KEY > ${HOME}/account-auth.json
+           docker login -u _json_key --password-stdin https://eu.gcr.io < ${HOME}/account-auth.json
+#       echo "$GCLOUD_SERVICE_KEY" | base64 --decode --ignore-garbage > /tmp/google_creds.json
+#       docker login -u _json_key -p "$(cat /tmp/google_creds.json)" gcr.io/pe-dev-185509/avn-python
+
 version: 2.1
 orbs:
   clair: ovotech/clair-scanner@1.4.25
@@ -6,7 +15,8 @@ jobs:
   container_vulnerability_scan:
     executor: clair/default
     steps:
-      - checkout 
+      - checkout
+      - run: *gcp-docker-login    
       - clair/scan:
           image: entur/cci-toolbox:1.1
  
