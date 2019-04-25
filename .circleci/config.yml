@@ -1,8 +1,6 @@
 version: 2.1
 orbs:
-  clair: ovotech/clair-scanner@1.4.25
   owasp: entur/owasp@0.0.2
-
 
 jobs:
   build:
