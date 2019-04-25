@@ -1,5 +1,11 @@
-# CircleCI 2.0 Demo Application: Building Docker image [![CircleCI Build Status](https://circleci.com/gh/circleci/cci-demo-docker.svg?style=shield)](https://circleci.com/gh/circleci/cci-demo-docker) [![MIT Licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/circleci/cci-demo-react/master/LICENSE)
+# CircleCI Workflows Demos: Parallel Jobs
 
-This is an example application showcasing how to build Docker images in CircleCI 2.0.
+...
 
-You can follow along with this project by reading the following doc: https://circleci.com/docs/2.0/building-docker-images
+## Other Workflows Demos
+
+* [Parallel Jobs](https://github.com/CircleCI-Public/circleci-demo-workflows/tree/parallel-jobs)
+* [Sequential Job / Branch-Level](https://github.com/CircleCI-Public/circleci-demo-workflows/tree/sequential-branch-filter)
+* [Fan-in / Fan-out](https://github.com/CircleCI-Public/circleci-demo-workflows/tree/fan-in-fan-out)
+* [Workspace Forwarding](https://github.com/CircleCI-Public/circleci-demo-workflows/tree/workspace-forwarding)
+
