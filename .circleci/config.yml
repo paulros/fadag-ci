@@ -53,7 +53,7 @@ jobs:
           name: Install Docker client
           command: |
              set -x \
-             curl -fSL "https://download.docker.com/linux/static/stable/x86_64/docker-17.09.1-ce.tgz" -o docker.tgz \
+             curl -fSL "https://download.docker.com/linux/static/stable/x86_64/docker-18.03.0-ce.tgz" -o docker.tgz \
              tar -xzvf docker.tgz \
              mv docker/* /usr/local/bin/ \
              rmdir docker \
