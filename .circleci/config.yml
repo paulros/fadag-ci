@@ -65,8 +65,8 @@ jobs:
       - run:
           name: GCP login
           command: |            
-            echo $GCLOUD_SERVICE_KEY > ${HOME}/account-auth.json
             docker login -u _json_key -p ${GCLOUD_SERVICE_KEY} https://eu.gcr.io 
+
 #      - run:
 #          name: Push Docker image
 #          command: |            
@@ -79,3 +79,7 @@ jobs:
 
       - store_test_results:
           path: /tmp/test-results
+workflows:
+  version: 2.0
+    - build:
+        context: global
