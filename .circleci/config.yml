@@ -4,24 +4,87 @@ aliases:
     command: |
            echo $GCLOUD_SERVICE_KEY > ${HOME}/account-auth.json
            docker login -u _json_key --password-stdin https://eu.gcr.io < ${HOME}/account-auth.json
-#       echo "$GCLOUD_SERVICE_KEY" | base64 --decode --ignore-garbage > /tmp/google_creds.json
-#       docker login -u _json_key -p "$(cat /tmp/google_creds.json)" gcr.io/pe-dev-185509/avn-python
 
 version: 2.1
-orbs:
-  clair: ovotech/clair-scanner@1.4.25
- 
+
 jobs:
-  container_vulnerability_scan:
-    executor: clair/default
+  build:
+    docker:
+      - image: circleci/cci-demo-docker-primary:0.0.2
+      - image: postgres:9.4.1
+        environment:
+          POSTGRES_USER: ubuntu
+          POSTGRES_DB: contacts
+    working_directory: /go/src/github.com/circleci/cci-demo-docker
+
+    environment:
+      TEST_RESULTS: /tmp/test-results
+
     steps:
       - checkout
-      - run: *gcp-docker-login    
-      - clair/scan:
-          image: entur/cci-toolbox:1.1
- 
+
+      - run:
+          name: Waiting for Postgres to be ready
+          command: |
+            for i in `seq 1 10`;
+            do
+              nc -z localhost 5432 && echo Success && exit 0
+              echo -n .
+              sleep 1
+            done
+            echo Failed waiting for Postgress && exit 1
+
+      - run: mkdir -p $TEST_RESULTS
+
+      - run:
+          name: Run unit tests
+          environment:
+            DATABASE_URL: "postgres://ubuntu@localhost:5432/contacts?sslmode=disable"
+            DB_MIGRATIONS: /go/src/github.com/circleci/cci-demo-docker/db/migrations
+          command: |
+            set -ou pipefail
+            trap "go-junit-report <${TEST_RESULTS}/go-test.out > ${TEST_RESULTS}/go-test-report.xml" EXIT
+            # Notice this `set -o pipefail`, this will cause script to fail if `make test` fails
+            # without this option script will return success regardless of testing result due to pipe after test command
+            make test | tee ${TEST_RESULTS}/go-test.out
+
+      - setup_remote_docker
+
+      # This should go into custom primary image, here's only for the sake of explanation
+      - run:
+          name: Install Docker client
+          command: |
+            set -x
+            VER="17.03.0-ce"
+            curl -L -o /tmp/docker-$VER.tgz https://get.docker.com/builds/Linux/x86_64/docker-$VER.tgz
+            tar -xz -C /tmp -f /tmp/docker-$VER.tgz
+            mv /tmp/docker/* /usr/bin
+
+      - run:
+          name: Build service
+          command: make
+
+      - run:
+          name: Build Docker image
+          command: |
+            TAG="0.1.${CIRCLE_BUILD_NUM}"
+            docker build -t circleci/cci-demo-docker:$TAG .
+      
+      - run: *gcp-docker-login
+
+      - run:
+          name: Push to the GCP
+          command: |
+            docker push eu.gcr.io/fagdag-devops/circleci/cci-demo-docker:$TAG
+            
+
 workflows:
-  vulnerability_scan:
+
+  main:
     jobs:
-      - container_vulnerability_scan:
-         context: global
+      - build:
+          context: global
+#      - owasp/owasp_dependency_check:
+#          context: global
+#          requires:
+#            - build
